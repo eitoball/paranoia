@@ -129,6 +129,11 @@ class ParanoiaTest < test_framework
     assert model.instance_variable_get(:@destroy_callback_called)
     assert model.instance_variable_get(:@after_destroy_callback_called)
     assert model.instance_variable_get(:@after_commit_callback_called)
+    if ActiveRecord::VERSION::STRING >= '5.1'
+      assert_nil model.instance_variable_get(:@after_commit_callback_on_create_called)
+      assert_nil model.instance_variable_get(:@after_commit_callback_on_update_called)
+      assert model.instance_variable_get(:@after_commit_callback_on_destroy_called)
+    end
   end
 
 
@@ -144,6 +149,11 @@ class ParanoiaTest < test_framework
     assert_nil model.instance_variable_get(:@destroy_callback_called)
     assert_nil model.instance_variable_get(:@after_destroy_callback_called)
     assert_nil model.instance_variable_get(:@after_commit_callback_called)
+    if ActiveRecord::VERSION::STRING >= '5.1'
+      assert_nil model.instance_variable_get(:@after_commit_callback_on_create_called)
+      assert_nil model.instance_variable_get(:@after_commit_callback_on_update_called)
+      assert_nil model.instance_variable_get(:@after_commit_callback_on_destroy_called)
+    end
   end
 
   def test_delete_in_transaction_behavior_for_plain_models_callbacks
@@ -1113,6 +1123,9 @@ class CallbackModel < ActiveRecord::Base
 
   after_destroy       { |model| model.instance_variable_set :@after_destroy_callback_called, true }
   after_commit        { |model| model.instance_variable_set :@after_commit_callback_called, true }
+  after_commit(on: :create) { |model| model.instance_variable_set :@after_commit_callback_on_create_called, true }
+  after_commit(on: :update) { |model| model.instance_variable_set :@after_commit_callback_on_update_called, true }
+  after_commit(on: :destroy) { |model| model.instance_variable_set :@after_commit_callback_on_destroy_called, true }
 
   validate            { |model| model.instance_variable_set :@validate_called, true }
 

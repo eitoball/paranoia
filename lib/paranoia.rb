@@ -86,6 +86,8 @@ module Paranoia
     if persisted?
       # if a transaction exists, add the record so that after_commit
       # callbacks can be run
+      @_trigger_destroy_callback = true
+      @_new_record_before_last_commit = false
       add_to_transaction
       update_columns(paranoia_destroy_attributes)
     elsif !frozen?
